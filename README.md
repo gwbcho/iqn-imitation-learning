@@ -1,18 +1,20 @@
-# Distributional Policy Optimization: Reproducing the Generative Actor Critic Algorithm
+# Using AIQNs and Imitation learning to Construct an Optimal Stochastic Policy for Primate Arm Motion
 
 
 ## Objectives
 
-The paper describes a method to represent arbitrary distribution functions over a continuous action space allowing for the construction of an optimal stationary stochastic policy. Without making assumptions about the underlying distribution, their generative scheme, called Generative Actor Critic, can overcome some limitations of more traditional policy gradient methods.
+In this project, the objective is to construct an abstract stochastic policy mapping motor cortex states (measured by electrode activation) to some stationary distribution over arm actions. This policy will be learned using collected expert motion data as a reference and feeding this information into a new form of implicit quantile network known as an AIQN which assumes some autoregressive correlation between previous actions and is a function approximator that takes in random noise and outputs a sample from a target distribution. The use of a stationary distribution for action selection is primarily for computational simplicity though it is possible, if not preferable, to lift this approach to a non stationary stochastic policy by using more than one network and acquiring more training data. The hope is to overcome the uncertainty present in arm position and neural activity data through some stochastic policy following some learned distribution (determined via expert data). As this project is simply a proof of concept, the algorithm will restrictively learn in a supervised fashion, this is opposed to the joint supervised and reinforcement learning approach commonly found in imitation learning literature.
 
-The purpose of this project is to reproduce Figure 4 which plots the training curves of 6 different methods on 6 DeepMind MuJoCo control suites. Reproducing this figure requires that we reproducing the entire paper as 3 variations of GAC need to be implemented and tested, while 3 previous methods have code available online.
+## Related Work
 
-As the paper has stated, GAC is computationally more expensive than current PG methods. Therefore, we anticipate we need the most computationally powerful Google Cloud instance or equivalence, e.g. c2-standard-60 with 60 vCPUs.
+### Scalable Muscle-Actuated Human Simulation and Control
+
+This paper is the work that is most similar to what we aim to do in this project. They built a comprehensive muscu- loskeletal model and control system that was able to reproduce human movements driven by the dynamics of muscle contraction. They took into account variations in the anatomic model to account for movements from the highly typical to the highly stylistic. Using deep reinforce- ment learning, they delve into the scalable and reliable simulation of anatomical features and movements. Their key contribution was using a scalable, two-level imitation learning algorithm. This algorithm was able to deal with the full range of motions in terms of the full-body muscu- loskeletal model using 346 muscles. They also demonstrated predictive accuracy of motor skills even under varying anatomical conditions ranging from bone deformity, muscle weakness, con- tracture, and prosthesis use. They also simulate pathological gaits and were able to predictively visualize how orthopedic surgeries would impact the gait of the patients.
 
 
 ## Project Layout
 
-The four main components of the Generative Actor Critic (GAC) Algorithm are the Actor Architecture, tne Value Network, the Critic Network, and the Delayed Actor which tracks the explorer Actor using a Polyak averaging scheme. These major componentes can be found under the policies/gac directory while the tests and other policies to reproduce from the original paper (https://arxiv.org/pdf/1905.09855.pdf) can be found under policies/ddpg.
+The main components of the Immitation Actor Critic (IAC) is the Actor model, which is responsible for immitating the actions of the expert agent, and the AIQN which is responsible for constructing a sampling strategy for actions over continuous actions space. These major componentes can be found under the IAC directory.
 
 
 ## Run Commands
@@ -30,7 +32,6 @@ The current requirements for this project are:
 - tensorflow
 - docker
 - numpy
-- mujoco - see explanation here: https://github.com/openai/mujoco-py (still need to add this to requirements)
 - gym
 - tqdm - for tracking experiment time left
 - visdom - for visualization of the learning process
@@ -71,4 +72,4 @@ There are no current bugs.
 
 ## Contributors
 
-Gregory Cho, Jiuyang Bai, Linlin Liu, Liu Yang, Xingchi Yan
+Gregory Cho, Olivia Langley, Sean Nathan
