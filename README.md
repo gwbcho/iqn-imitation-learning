@@ -9,12 +9,12 @@ In this project, the objective is to construct an abstract stochastic policy map
 
 ### Scalable Muscle-Actuated Human Simulation and Control
 
-This paper is the work that is most similar to what we aim to do in this project. They built a comprehensive muscu- loskeletal model and control system that was able to reproduce human movements driven by the dynamics of muscle contraction. They took into account variations in the anatomic model to account for movements from the highly typical to the highly stylistic. Using deep reinforce- ment learning, they delve into the scalable and reliable simulation of anatomical features and movements. Their key contribution was using a scalable, two-level imitation learning algorithm. This algorithm was able to deal with the full range of motions in terms of the full-body musculoskeletal model using 346 muscles. They also demonstrated predictive accuracy of motor skills even under varying anatomical conditions ranging from bone deformity, muscle weakness, contracture, and prosthesis use. They also simulate pathological gaits and were able to predictively visualize how orthopedic surgeries would impact the gait of the patients.
+This paper is the work that is most similar to what we aim to do in this project. They built a comprehensive musculoskeletal model and control system that was able to reproduce human movements driven by the dynamics of muscle contraction. They took into account variations in the anatomic model to account for movements from the highly typical to the highly stylistic. Using deep reinforce- ment learning, they delve into the scalable and reliable simulation of anatomical features and movements. Their key contribution was using a scalable, two-level imitation learning algorithm. This algorithm was able to deal with the full range of motions in terms of the full-body musculoskeletal model using 346 muscles. They also demonstrated predictive accuracy of motor skills even under varying anatomical conditions ranging from bone deformity, muscle weakness, contracture, and prosthesis use. They also simulate pathological gaits and were able to predictively visualize how orthopedic surgeries would impact the gait of the patients.
 
 
 ## Project Layout
 
-The main components of the Immitation Actor Critic (IAC) is the Actor model, which is responsible for immitating the actions of the expert agent, and the AIQN which is responsible for constructing a sampling strategy for actions over continuous actions space. These major componentes can be found under the IAC directory.
+The main components of the Imitation Distributional Policy (IDP) is the IDPAgent model, which is responsible for immitating the actions of the expert agent, and the AIQN which is responsible for constructing a sampling strategy for actions over continuous actions space. These major componentes can be found under the IDP directory.
 
 
 ## Run Commands

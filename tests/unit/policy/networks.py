@@ -2,7 +2,7 @@ import unittest
 
 import tensorflow as tf
 
-import GAC.networks as networks
+import IDP.networks as networks
 
 
 class TestGacNetworks(unittest.TestCase):
@@ -120,30 +120,6 @@ class TestGacNetworks(unittest.TestCase):
         action = actor(state, taus, prev_action)
         self.assertEqual(action.shape[0], batch_size_1)
         self.assertEqual(action.shape[1], action_dim)
-
-    def test_critic_network(self):
-        batch_size_1 = 10
-        num_inputs = 20
-        action_dim = 5
-        critic = networks.Critic(num_inputs, action_dim)
-        # random variable to feed into critic
-        state = tf.Variable(
-            tf.random.normal(
-                [batch_size_1, num_inputs],
-                stddev=.1,
-                dtype=tf.float32
-            )
-        )
-        x = tf.Variable(
-            tf.random.normal(
-                [batch_size_1, action_dim],
-                stddev=.1,
-                dtype=tf.float32
-            )
-        )
-        out = critic(state, x)
-        self.assertEqual(out.shape[0], batch_size_1)
-        self.assertEqual(out.shape[1], 1)
 
 
 if __name__ == '__main__':
