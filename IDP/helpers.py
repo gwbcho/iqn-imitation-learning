@@ -81,4 +81,3 @@ def update(target, source, rate):
     source_params = source.trainable_variables
     for t, s in zip(target_params, source_params):
         t.assign(t * (1.0 - rate) + s * rate)
-
