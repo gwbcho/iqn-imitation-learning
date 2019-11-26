@@ -97,108 +97,27 @@ def create_argument_parser():
     return parser
 
 
-def evaluate_policy(policy, env, episodes):
-    """
-    Run the environment env using policy for episodes number of times.
-    Return: average rewards per episode.
-    """
-    total_reward = 0.0
-    for _ in range(episodes):
-        state = env.reset()
-        is_terminal = False
-        while not is_terminal:
-            action = policy.get_action(tf.convert_to_tensor([state], dtype=tf.float32))
-            # remove the batch_size dimension if batch_size == 1
-            action = tf.squeeze(action, [0]).numpy()
-            state, reward, is_terminal, _ = env.step(action)
-            total_reward += reward
-            # env.render()
-    return total_reward / episodes
-
-
 def main():
     print(tf.__version__)
     print("GPU Available: ", tf.test.is_gpu_available())
 
     args = create_argument_parser().parse_args()
 
-    """
-    Create Mujoco environment
-    """
-    env = NormalizedActions(gym.make(args.environment))
-    eval_env = NormalizedActions(gym.make(args.environment))
-    args.action_dim = env.action_space.shape[0]
-    args.state_dim = env.observation_space.shape[0]
+    action_dim = 38
+    state_dim = 100
+    args.action_dim = action_dim
+    args.state_dim = state_dim
 
-    base_dir = os.getcwd() + '/models/' + args.environment + '/'
+    base_dir = os.getcwd() + '/model/'
     run_number = 0
     while os.path.exists(base_dir + str(run_number)):
         run_number += 1
     base_dir = base_dir + str(run_number)
     os.makedirs(base_dir)
 
-    gac = GACAgent(args)
-    state = env.reset()
-    results_dict = {
-        'train_rewards': [],
-        'eval_rewards': [],
-        'actor_losses': [],
-        'value_losses': [],
-        'critic_losses': []
-    }
-    episode_steps, episode_rewards = 0, 0 # total steps and rewards for each episode
+    gac = IDPAgent(args)
 
-    num_steps = args.num_steps
-    if num_steps is not None:
-        nb_epochs = int(num_steps) // (args.epoch_cycles * args.rollout_steps)
-    else:
-        nb_epochs = 500
-    """
-    training loop
-    """
-    average_rewards = 0
-    count = 0
-    total_steps = 0
-    for epoch in trange(nb_epochs):
-        for cycle in range(args.epoch_cycles):
-            for rollout in range(args.rollout_steps):
-                """
-                Get an action from neural network and run it in the environment
-                """
-                # print('t:', t)
-                action = gac.get_action(tf.convert_to_tensor([state], dtype=tf.float64))
-                # remove the batch_size dimension if batch_size == 1
-                action = tf.squeeze(action, [0]).numpy()
-                next_state, reward, is_terminal, _ = env.step(action)
-                gac.store_transitions(state, action, reward, next_state, is_terminal)
-                episode_rewards += reward
-                # print('average_rewards:', average_rewards)
 
-                # check if game is terminated to decide how to update state, episode_steps,
-                # episode_rewards
-                if is_terminal:
-                    state = env.reset()
-                    results_dict['train_rewards'].append(
-                        (total_steps, episode_rewards / episode_steps)
-                    )
-                    episode_steps = 0
-                    episode_rewards = 0
-                else:
-                    state = next_state
-                    episode_steps += 1
-
-                # evaluate
-                if total_steps % args.eval_freq == 0:
-                    eval_reward = evaluate_policy(gac, eval_env, args.eval_episodes)
-                    print('eval_reward:', eval_reward)
-                    results_dict['eval_rewards'].append((total_steps, eval_reward))
-
-                total_steps += 1
-
-            # train
-            if gac.replay.size >= args.batch_size:
-                for _ in range(args.T):
-                    gac.train_one_step()
 
     utils.save_model(gac.actor, base_dir)
 

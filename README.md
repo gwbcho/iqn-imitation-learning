@@ -14,7 +14,7 @@ This paper is the work that is most similar to what we aim to do in this project
 
 ## Project Layout
 
-The main components of the Imitation Distributional Policy (IDP) is the IDPAgent model, which is responsible for immitating the actions of the expert agent, and the AIQN which is responsible for constructing a sampling strategy for actions over continuous actions space. These major componentes can be found under the IDP directory.
+The main components of the Imitation Distributional Policy (IDP) is the IDPAgent model, which is responsible for immitating the actions of the expert agent, and the AIQN which is responsible for constructing a sampling strategy for actions over continuous actions space. These major componentes can be found under the IDP directory. It should be noted (for both users and programmers that the actions returned by the networks are values between [-1, 1]).
 
 
 ## Run Commands
@@ -34,7 +34,6 @@ The current requirements for this project are:
 - numpy
 - gym
 - tqdm - for tracking experiment time left
-- visdom - for visualization of the learning process
 
 
 ## Docker commands
