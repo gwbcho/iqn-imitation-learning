@@ -67,7 +67,10 @@ class IQNActor(tf.Module):
         # we will use in the loss function.
 
         self.module_type = 'IQNActor'
-        self.huber_loss_function = tf.keras.losses.Huber(delta=1.0)  # delta is kappa in paper
+        self.huber_loss_function = tf.keras.losses.Huber(
+            delta=1.0,
+            reduction=tf.keras.losses.Reduction.NONE
+        )  # delta is kappa in paper
         self.optimizer = tf.keras.optimizers.Adam(0.0001)
 
     def target_density(self, mode, advantage, beta):
@@ -109,9 +112,8 @@ class IQNActor(tf.Module):
         # delta is kappa in paper
         eltwise_loss = tf.math.abs(taus - I_delta) * eltwise_huber_loss * weights
         #(batch_size, action_dim)
-
+        # mean over batches, sum over action dimensions, according to Algorithm 2.
         return tf.math.reduce_mean(eltwise_loss) * self.action_dim
-             # mean over batches, sum over action dimensions, according to Algorithm 2.
 
     def train(self, states, supervise_actions, advantage, mode, beta):
         '''
@@ -148,7 +150,7 @@ class AutoRegressiveStochasticActor(IQNActor):
         self.module_type = 'AutoRegressiveStochasticActor'
         self.state_embedding = Dense(
             400,  # as specified by the architecture in the paper and in their code
-            activation=tf.nn.leaky_relu
+            activation=tf.keras.layers.LeakyReLU(alpha=0.01)
         )
         # use the cosine basis linear classes to "embed" the inputted values to a set dimension
         # this is equivalent to the psi function specified in the Actor diagram
@@ -158,7 +160,7 @@ class AutoRegressiveStochasticActor(IQNActor):
         # construct the GRU to ensure autoregressive qualities of our samples
         self.rnn = tf.keras.layers.GRU(400, return_state=True, return_sequences=True)
         # post processing linear layers
-        self.dense_layer_1 = Dense(400, activation=tf.nn.leaky_relu)
+        self.dense_layer_1 = Dense(400, activation=tf.keras.layers.LeakyReLU(alpha=0.01))
         # output layer (produces the sample from the implicit quantile function)
         # note the output is between [0, 1]
         self.dense_layer_2 = Dense(1, activation=tf.nn.tanh)
@@ -197,7 +199,9 @@ class AutoRegressiveStochasticActor(IQNActor):
         # dimension. Note that the actions are in the domain [0, 1] (Why? I dunno).
         for idx in range(self.action_dim):
             # batch x 1 x 400
-            action_embedding = self.action_embedding(tf.reshape(action, (batch_size, 1, 1)))
+            action_embedding = tf.nn.leaky_relu(
+                self.action_embedding(tf.reshape(action, (batch_size, 1, 1)))
+            )
             rnn_input = tf.concat([state_embedding, action_embedding], axis=2)
             # Note that the RNN states encode the function approximation for the conditional
             # probability of the ordered sequence of vectors in d dimension space. Effectively,
@@ -241,7 +245,7 @@ class AutoRegressiveStochasticActor(IQNActor):
         shifted_actions = tf.Variable(tf.zeros_like(supervise_actions))
         # assign shifted actions
         shifted_actions = shifted_actions[:, 1:].assign(supervise_actions[:, :-1])
-        provided_action_embedding = self.action_embedding(shifted_actions)
+        provided_action_embedding = tf.nn.leaky_relu(self.action_embedding(shifted_actions))
 
         rnn_input = tf.concat([state_embedding, provided_action_embedding], axis=2)
         gru_out, _ = self.rnn(rnn_input)
@@ -271,7 +275,6 @@ class StochasticActor(IQNActor):
         super(StochasticActor, self).__init__(state_dim, action_dim)
         self.module_type = 'StochasticActor'
         self.noise_embed_dim = 400 // action_dim
-
 
         self.state_embedding_layer = Dense(
             self.noise_embed_dim * self.action_dim,
