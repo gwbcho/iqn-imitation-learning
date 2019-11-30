@@ -71,7 +71,7 @@ def create_argument_parser():
         help='For multiple different experiments, provide an informative experiment name'
     )
     parser.add_argument('--print', default=False, action='store_true')
-    parser.add_argument('--actor', default='IQN', choices=['IQN', 'AIQN'])
+    parser.add_argument('--actor', default='IQN', choices=['IQN', 'AIQN', 'RNN'])
     parser.add_argument(
         '--normalize_obs', default=False, action='store_true', help='Normalize observations'
     )
@@ -83,16 +83,19 @@ def create_argument_parser():
         help='Uniformly smooth the Q function in this range.'
     )
     parser.add_argument(
-        '--mode', type=str, default='linear', choices=['linear', 'max', 'boltzman', 'uniform'],
+        '--mode', type=str, default='linear', choices=['linear', 'max', 'boltzmann', 'uniform'],
         help='Target policy is constructed based on this operator. default="linear" '
     )
     parser.add_argument(
         '--beta', type=float, default=1.0,
-        help='Boltzman Temperature for normalizing actions, default=1.0'
+        help='Boltzmann Temperature for normalizing actions, default=1.0'
     )
     parser.add_argument(
         '--num_steps', type=int, default=2000000, metavar='N',
         help='number of training steps to play the environments game (default: 2000000)'
+    )
+    parser.add_argument(
+        '--expert_noise', type=float, default=0.01, help='noise for expert actions.'
     )
     return parser
 
@@ -115,9 +118,9 @@ def main():
     base_dir = base_dir + str(run_number)
     os.makedirs(base_dir)
 
-    gac = IDPAgent(args)
+    gac = GACAgent(**args.__dict__)
 
-
+    # TODO: train the network
 
     utils.save_model(gac.actor, base_dir)
 

@@ -15,18 +15,15 @@ def distance_from_expert(agent_actions, expert_actions):
             the agent actions
 
     Returns:
-        distance values as a tensor with dimensions (batch_size, 1) or a scalar value if the input
-        is a single vector
+        distance values as a tensor with dimensions (batch_size, 1)
     """
     single_vector_used = False
     # account for the agent actions being a single vector
-    if len(agent_actions.shape) <= 1:
+    if len(agent_actions.shape) == 1:
         single_vector_used = True
         agent_actions = tf.expand_dims(agent_actions, 0)
         expert_actions = tf.expand_dims(expert_actions, 0)
     diff = tf.math.squared_difference(agent_actions, expert_actions)
     sum_of_diff = tf.math.reduce_sum(diff, 1)  # sum over all action differences from expert
     euclidean_distance = tf.math.sqrt(sum_of_diff)
-    if single_vector_used:
-        euclidean_distance = euclidean_distance[0]
     return euclidean_distance
