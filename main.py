@@ -6,7 +6,6 @@ import numpy as np
 import tensorflow as tf
 
 from agents.IDP.agent import IDPAgent
-from agents.GAC.agent import GACAgent
 from utils.preprocessing import get_data, get_actions_from_segrot
 
 
@@ -96,6 +95,10 @@ def create_argument_parser():
     parser.add_argument(
         '--expert_noise', type=float, default=0.01, help='noise for expert actions.'
     )
+    parser.add_argument(
+        '-f', '--expert_file', type=str, default='data/COS071212_mocap_processed.mat',
+        help='file to find expert actions for algorithm'
+    )
     return parser
 
 
@@ -145,13 +148,33 @@ def train(model, train_states, train_actions, batch_size):
         model.train_actor(shuffled_states, shuffled_actions)
 
 
+def evaluate_policy(policy, env, episodes):
+    """
+    Run the environment env using policy for episodes number of times.
+    Return: average rewards per episode.
+    """
+    rewards = []
+    for _ in range(episodes):
+        state = np.float32(env.reset())
+        is_terminal = False
+        while not is_terminal:
+            action = policy.get_action(tf.convert_to_tensor([state], dtype=tf.float32))
+            # remove the batch_size dimension if batch_size == 1
+            action = tf.squeeze(action, [0]).numpy()
+            state, reward, is_terminal, _ = env.step(action)
+            state, reward = np.float32(state), np.float32(reward)
+            rewards.append(float(reward))
+            # env.render()
+    return rewards
+
+
 def main():
     print(tf.__version__)
     print("GPU Available: ", tf.test.is_gpu_available())
 
     args = create_argument_parser().parse_args()
 
-    segrot, srates, markpos = get_data(file='data/COS071212_mocap_preprocessed.mat')
+    segrot, srates, markpos = get_data(file=args.expert_file)
     actions = get_actions_from_segrot(segrot)
     action_dim = actions.shape[1]
     state_dim = states.shape[1]
@@ -168,8 +191,17 @@ def main():
     idp_agent = IDPAgent(**args.__dict__)
     for _ in range(args.epochs):
         train(idp_agent, srates, actions, args.batch_size)
-
-    # TODO: train the network
+        eval_rewards = evaluate_policy(idp_agent, eval_env, args.eval_episodes)
+        eval_reward = sum(eval_rewards) / args.eval_episodes
+        eval_variance = float(np.var(eval_rewards))
+        results_dict['eval_rewards'].append({
+            'total_steps': total_steps,
+            'train_steps': train_steps,
+            'average_eval_reward': eval_reward,
+            'eval_reward_variance': eval_variance
+        })
+        with open('results.txt', 'w') as file:
+            file.write(json.dumps(results_dict['eval_rewards']))
 
     utils.save_model(idp_agent.actor, base_dir)
 

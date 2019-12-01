@@ -3,7 +3,7 @@ import tensorflow as tf
 from scipy.io import loadmat
 
 
-def get_data(file='data/COS071212_mocap_preprocessed.mat'):
+def get_data(file='data/COS071212_mocap_processed.mat'):
     """
     Get expert states and actions returned as a tuple
     (training_states, training_actions, test_states, test_actions) where the states and actions

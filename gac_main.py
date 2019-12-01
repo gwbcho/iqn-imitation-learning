@@ -94,6 +94,10 @@ def create_argument_parser():
         '--num_steps', type=int, default=2000000, metavar='N',
         help='number of training steps to play the environments game (default: 2000000)'
     )
+    parser.add_argument(
+        '-f', '--expert_file', type=str, default='data/COS071212_mocap_processed.mat',
+        help='file to find expert actions for algorithm'
+    )
     return parser
 
 
@@ -130,7 +134,7 @@ def main():
 
     args = create_argument_parser().parse_args()
 
-    segrot, srates, markpos = get_data(file='data/COS071212_mocap_preprocessed.mat')
+    segrot, srates, markpos = get_data(file=args.expert_file)
     actions = get_actions_from_segrot(segrot)
     action_dim = actions.shape[1]
     state_dim = states.shape[1]
