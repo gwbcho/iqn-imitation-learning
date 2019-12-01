@@ -1,9 +1,11 @@
-import os
 import argparse
+import os
+import json
 
-import gym
 import numpy as np
 import tensorflow as tf
+from tqdm import trange
+import json
 
 from agents.IDP.agent import IDPAgent
 from utils.preprocessing import get_data, get_actions_from_segrot
@@ -164,7 +166,6 @@ def evaluate_policy(policy, env, episodes):
             state, reward, is_terminal, _ = env.step(action)
             state, reward = np.float32(state), np.float32(reward)
             rewards.append(float(reward))
-            # env.render()
     return rewards
 
 
@@ -174,7 +175,7 @@ def main():
 
     args = create_argument_parser().parse_args()
 
-    segrot, srates, markpos = get_data(file=args.expert_file)
+    segrot, states, markpos = get_data(file=args.expert_file)
     actions = get_actions_from_segrot(segrot)
     action_dim = actions.shape[1]
     state_dim = states.shape[1]
@@ -189,14 +190,14 @@ def main():
     os.makedirs(base_dir)
 
     idp_agent = IDPAgent(**args.__dict__)
-    for _ in range(args.epochs):
-        train(idp_agent, srates, actions, args.batch_size)
+    for epoch in trange(args.epochs):
+        train(idp_agent, states, actions, args.batch_size)
         eval_rewards = evaluate_policy(idp_agent, eval_env, args.eval_episodes)
         eval_reward = sum(eval_rewards) / args.eval_episodes
         eval_variance = float(np.var(eval_rewards))
         results_dict['eval_rewards'].append({
-            'total_steps': total_steps,
-            'train_steps': train_steps,
+            'total_steps': epoch * states.shape[0],
+            'epoch': epoch,
             'average_eval_reward': eval_reward,
             'eval_reward_variance': eval_variance
         })

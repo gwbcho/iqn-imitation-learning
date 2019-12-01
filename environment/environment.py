@@ -47,10 +47,10 @@ class IDPEnvironment(object):
     def step(action):
         # convert actions [-1, 1] to [-180, 180]
         action = action * 180
-        self.index += 1
         if self.is_terminal:
             return self.current_state, -sys.maxsize, self.is_terminal
-        if self.index == self.final_index:
+        self.index += 1
+        if self.index >= self.final_index:
             self.is_terminal = True
         self.prev_action = action
         new_state = self.expert_states[self.index]

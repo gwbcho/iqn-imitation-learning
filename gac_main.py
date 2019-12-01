@@ -5,7 +5,6 @@ import os
 import numpy as np
 import tensorflow as tf
 from tqdm import trange
-import json
 
 import utils.utils as utils
 from environment.environment import IDPEnvironment
