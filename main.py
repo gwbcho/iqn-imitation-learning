@@ -183,7 +183,7 @@ def main():
     args.action_dim = action_dim
     args.state_dim = state_dim
 
-    eval_env = IDPEnvironment(states, segrots)
+    eval_env = IDPEnvironment(states, actions)
 
     base_dir = os.getcwd() + '/model/'
     run_number = 0

@@ -143,8 +143,8 @@ def main():
     """
     Create environment
     """
-    env = IDPEnvironment(states, segrots)
-    eval_env = IDPEnvironment(states, segrots)
+    env = IDPEnvironment(states, actions)
+    eval_env = IDPEnvironment(states, actions)
 
     if args.noise == 'ou':
         noise = OrnsteinUhlenbeckActionNoise(

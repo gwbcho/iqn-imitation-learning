@@ -38,6 +38,7 @@ def get_actions_from_segrot(segrot):
     action_dim = segrot.shape[1]
     actions = tf.Variable(tf.zeros((num_segrots, action_dim)))
     actions[0].assign(segrot[0])
-    for i in range(1, num_segrots):
-        actions[i].assign(segrot[i] - segrot[i - 1])
+    actions[1:num_segrots - 1].assign(segrot[1:num_segrots - 1] - segrot[0:num_segrots - 2])
+    # for i in range(1, num_segrots):
+    #     actions[i].assign(segrot[i] - segrot[i - 1])
     return actions
