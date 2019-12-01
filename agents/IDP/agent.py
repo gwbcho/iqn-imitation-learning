@@ -109,8 +109,8 @@ class IDPAgent:
                 good_states,
                 good_actions,
                 advantages,
-                self.args.mode,
-                self.args.beta
+                self.mode,
+                self.beta
             )
 
     def _sample_positive_advantage_actions(self, states, expert_actions, expert_noise=0.01):
