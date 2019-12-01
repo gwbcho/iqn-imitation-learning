@@ -134,14 +134,15 @@ class IDPAgent:
                 euclidean distance from the expert actions
         """
         # tile states to be of dimension (batch_size * K, state_dim)
-        print(states.shape)
         tiled_states = tf.tile(states, [self.action_samples, 1])
-        tiled_actions = tf.tile(expert_actions, [self.action_samples, 1])
+        tiled_expert_actions = tf.tile(expert_actions, [self.action_samples, 1])
         # Sample actions with noise for exploration
-        target_actions = tiled_actions + tf.random.normal(tiled_actions.shape) * expert_noise
+        target_actions = (
+            tiled_expert_actions + tf.random.normal(tiled_expert_actions.shape) * expert_noise
+        )
         target_actions = tf.clip_by_value(target_actions, -1, 1)
-        advantages = -environment.distance_from_expert(tiled_actions, expert_actions)
-        return target_states, target_actions, advantages
+        advantages = -environment.distance_from_expert(tiled_expert_actions, target_actions)
+        return tiled_states, target_actions, advantages
 
     def get_action(self, states):
         """
