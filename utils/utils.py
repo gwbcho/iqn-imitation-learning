@@ -15,7 +15,7 @@ def save_model(actor, basedir=None):
 
 
 def load_model(basedir=None):
-    actor_path = "{}/ddpg_actor".format(basedir)
+    actor_path = "{}/actor".format(basedir)
 
     print('Loading model from {}'.format(actor_path))
     actor = tf.saved_model.load(actor_path)
