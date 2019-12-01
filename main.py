@@ -146,9 +146,9 @@ def train(model, train_states, train_actions, batch_size):
     shuffled_states = tf.split(shuffled_states, split_details)
     shuffled_actions = tf.split(shuffled_actions, split_details)
 
-    for j in range(tl):
+    for i in range(tl):
         # Implement backprop:
-        model.train_actor(shuffled_states, shuffled_actions)
+        model.train_actor(shuffled_states[i], shuffled_actions[i])
 
 
 def evaluate_policy(policy, env, episodes):
@@ -192,7 +192,7 @@ def main():
     base_dir = base_dir + str(run_number)
     os.makedirs(base_dir)
 
-    idp_agent = IDPAgent(**args.__dict__)
+    idp_agent = IDPAgent(states=states, expert_actions=actions, **args.__dict__)
     for epoch in trange(args.epochs):
         train(idp_agent, states, actions, args.batch_size)
         eval_rewards = evaluate_policy(idp_agent, eval_env, args.eval_episodes)

@@ -33,7 +33,6 @@ class IDPAgent:
             states (tf.Variable): states for the entire arm motion
             expert_actions (tf.Variable): expert actions for the correspoding states (minus the
                 terminal state)
-            buffer_size (int): how much memory is allocated to the ReplayMemoryClass
             action_samples (int): originally labelled K in the paper, represents how many
                 actions should be sampled from the memory buffer
             mode (string): poorly named variable to represent variable being used in the
@@ -41,14 +40,11 @@ class IDPAgent:
             beta (float): value used in boltzmann distribution
             batch_size (int): batch size
             q_normalization (float): q value normalization rate
-            gamma (float): value used in critic training
             actor (string): string indicating the type of actor to use
             expert_noise (float): expert noise to regularize expert actions
         """
         self.action_dim = action_dim
         self.state_dim = state_dim
-        self.buffer_size = buffer_size
-        self.gamma = gamma
         self.action_samples = action_samples
         self.mode = mode
         self.beta = beta
@@ -138,6 +134,7 @@ class IDPAgent:
                 euclidean distance from the expert actions
         """
         # tile states to be of dimension (batch_size * K, state_dim)
+        print(states.shape)
         tiled_states = tf.tile(states, [self.action_samples, 1])
         tiled_actions = tf.tile(expert_actions, [self.action_samples, 1])
         # Sample actions with noise for exploration

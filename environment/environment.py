@@ -37,7 +37,7 @@ class IDPEnvironment(object):
         self.expert_states = expert_states
         self.expert_actions = expert_actions
         self.prev_action = self.expert_actions[0]
-        self.current_state = tf.concat([self.expert_states[0], self.prev_action], 1)
+        self.current_state = tf.concat([self.expert_states[0], self.prev_action], 0)
         self.index = 0
         self.final_index = self.expert_states.shape[0] - 1
         self.is_terminal = False
@@ -54,13 +54,13 @@ class IDPEnvironment(object):
             self.is_terminal = True
         self.prev_action = action
         new_state = self.expert_states[self.index]
-        new_state = tf.concat([new_state, self.prev_action], 1)
+        new_state = tf.concat([new_state, self.prev_action], 0)
         expert_state = tf.concat(
             [
                 self.expert_state[self.index],
                 self.expert_actions[self.index]
             ],
-            1
+            0
         )
         expert_action = self.expert_actions[self.index]
         self.current_state = new_state
@@ -71,7 +71,7 @@ class IDPEnvironment(object):
     def reset():
         self.is_terminal = False
         self.prev_action = self.expert_actions[0]
-        self.current_state = tf.concat([self.expert_states[0], self.prev_action], 1)
+        self.current_state = tf.concat([self.expert_states[0], self.prev_action], 0)
         self.index = 0
         return self.current_state
 
