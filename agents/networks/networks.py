@@ -413,12 +413,62 @@ class StochasticActor(IQNActor):
         self.state_embedding_layer = Dense(
             self.noise_embed_dim * self.action_dim,
             activation=LeakyReLU(alpha=0.01),
-            input_shape = (self.state_dim,)
-        )
+            input_shape = (self.state_dim,))
 
         self.noise_embedding_layer = CosineBasisLinear(
             n_basis_functions, self.noise_embed_dim,
-            activation=LeakyReLU(alpha=0.01)
+            activation=LeakyReLU(alpha=0.01))
+
+        self.merge_embedding_layer = Dense(
+            200, activation=LeakyReLU(alpha=0.01),
+            input_shape = (self.noise_embed_dim * self.action_dim,))
+
+        self.output_action_layer = Dense(
+            self.action_dim, activation= tf.nn.tanh,
+            input_shape = (200,))
+
+    def __call__(self, states, taus, supervise_actions = None):
+        """
+        Args:
+            states: tensor (batch_size, state_dim)
+            taus: tensor (batch_size, action_dim)
+            supervise_actions = None: to be consistent with AIQN. But is not used here.
+        Return:
+            next_actions: tensor (batch_size, action_dim)
+        """
+        state_embedding = self.state_embedding_layer(states)
+        # (batch_size, self.noise_embed_dim * self.action_dim)
+        noise_embedding = self.noise_embedding_layer(taus)
+        # (batch_size, self.action_dim, self.embed_dim)
+        noise_embedding = tf.reshape(noise_embedding, (-1, self.noise_embed_dim * self.action_dim))
+        # (batch_size, self.noise_embed_dim * self.action_dim)
+        merge = state_embedding * noise_embedding
+        # (batch_size, self.noise_embed_dim * self.action_dim)
+        merge_embedding = self.merge_embedding_layer(merge)  #(batch_size, 200)
+        actions = self.output_action_layer(merge_embedding) # (batch_size, self.action_dim)
+        return actions
+
+
+class IQNFFN(tf.Module):
+    def __init__(self, state_dim, action_dim, n_basis_functions=64):
+        """
+        The IQN stochasitc action generator, takes state and tau (random vector) as input, and output
+        the next action. This generator is not in an autoregressive way, i.e. the next action is
+        generated as a whole, instead of one dimension by one dimension.
+
+        Class Args:
+            state_dim (int): the dimensionality of the state vector
+            action_dim (int): the dimensionality of the action vector
+            n_basis_functions (int): the number of basis functions for noise embedding.
+        """
+        super(StochasticActor, self).__init__(state_dim, action_dim)
+        self.module_type = 'StochasticActor'
+        self.noise_embed_dim = 400 // action_dim
+
+        self.state_embedding_layer = Dense(
+            self.noise_embed_dim * self.action_dim,
+            activation=LeakyReLU(alpha=0.01),
+            input_shape = (self.state_dim,)
         )
 
         self.merge_embedding_layer = Dense(
@@ -444,61 +494,6 @@ class StochasticActor(IQNActor):
         """
         state_embedding = self.state_embedding_layer(states)
         merge_embedding = self.merge_embedding_layer(state_embedding)  #(batch_size, 200)
-        actions = self.output_action_layer(merge_embedding) # (batch_size, self.action_dim)
-        return actions
-
-
-class IQNFFN(tf.Module):
-    def __init__(self, state_dim, action_dim, n_basis_functions=64):
-        """
-        The IQN stochasitc action generator, takes state and tau (random vector) as input, and output
-        the next action. This generator is not in an autoregressive way, i.e. the next action is
-        generated as a whole, instead of one dimension by one dimension.
-
-        Class Args:
-            state_dim (int): the dimensionality of the state vector
-            action_dim (int): the dimensionality of the action vector
-            n_basis_functions (int): the number of basis functions for noise embedding.
-        """
-        super(StochasticActor, self).__init__(state_dim, action_dim)
-        self.module_type = 'StochasticActor'
-        self.noise_embed_dim = 400 // action_dim
-
-        self.state_embedding_layer = Dense(
-            self.noise_embed_dim * self.action_dim,
-            activation=LeakyReLU(alpha=0.01),
-            input_shape = (self.state_dim,))
-
-        self.noise_embedding_layer = CosineBasisLinear(
-            n_basis_functions, self.noise_embed_dim,
-            activation=LeakyReLU(alpha=0.01))
-
-        self.merge_embedding_layer = Dense(
-            200, activation= LeakyReLU(alpha=0.01),
-            input_shape = (self.noise_embed_dim * self.action_dim,))
-
-        self.output_action_layer = Dense(
-            self.action_dim, activation= tf.nn.tanh,
-            input_shape = (200,))
-
-    def __call__(self, states, taus, supervise_actions = None):
-        """
-        Args:
-            states: tensor (batch_size, state_dim)
-            taus: tensor (batch_size, action_dim)
-            supervise_actions = None: to be consistent with AIQN. But is not used here.
-        Return:
-            next_actions: tensor (batch_size, action_dim)
-        """
-        state_embedding = self.state_embedding_layer(states)
-        # (batch_size, self.noise_embed_dim * self.action_dim)
-        noise_embedding = self.noise_embedding_layer(taus)
-        # (batch_size, self.action_dim, self.embed_dim)
-        noise_embedding = tf.reshape(noise_embedding, (-1, self.noise_embed_dim * self.action_dim))
-        # (batch_size, self.noise_embed_dim * self.action_dim)
-        merge = state_embedding * noise_embedding
-        # (batch_size, self.noise_embed_dim * self.action_dim)
-        merge_embedding = self.merge_embedding_layer(merge)  #(batch_size, 200)
         actions = self.output_action_layer(merge_embedding) # (batch_size, self.action_dim)
         return actions
 
