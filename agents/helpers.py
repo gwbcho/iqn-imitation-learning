@@ -15,7 +15,7 @@ class ActionSampler():
     def __init__(self, action_dim):
         self.dim = action_dim
 
-    def get_actions(self, actor, states, actions=None):
+    def get_sampled_actions(self, actor, states, actions=None):
         """
         Actions are obtained from the actor network.
         """
@@ -28,6 +28,9 @@ class ActionSampler():
             tf.random.uniform((batch_size, self.dim), minval=0.0, maxval=1.0),
             actions
         )
+
+    def get_deterministic_actions(self, actor, states, actions=None):
+        return actor(states, actions)
 
 
 class ReplayBuffer:

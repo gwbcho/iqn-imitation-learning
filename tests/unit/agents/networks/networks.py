@@ -2,7 +2,7 @@ import unittest
 
 import tensorflow as tf
 
-import IDP.networks as networks
+import agents.networks.networks as networks
 
 
 class TestGacNetworks(unittest.TestCase):

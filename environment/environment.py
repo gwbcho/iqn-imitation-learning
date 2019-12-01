@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 import tensorflow as tf
 
@@ -15,18 +17,63 @@ def distance_from_expert(agent_actions, expert_actions):
             the agent actions
 
     Returns:
-        distance values as a tensor with dimensions (batch_size, 1) or a scalar value if the input
-        is a single vector
+        distance values as a tensor with dimensions (batch_size, 1)
     """
     single_vector_used = False
     # account for the agent actions being a single vector
-    if len(agent_actions.shape) <= 1:
+    if len(agent_actions.shape) == 1:
         single_vector_used = True
         agent_actions = tf.expand_dims(agent_actions, 0)
         expert_actions = tf.expand_dims(expert_actions, 0)
     diff = tf.math.squared_difference(agent_actions, expert_actions)
     sum_of_diff = tf.math.reduce_sum(diff, 1)  # sum over all action differences from expert
     euclidean_distance = tf.math.sqrt(sum_of_diff)
-    if single_vector_used:
-        euclidean_distance = euclidean_distance[0]
     return euclidean_distance
+
+
+class IDPEnvironment(object):
+
+    def __init__(self, expert_states, expert_actions):
+        self.expert_states = expert_states
+        self.expert_actions = expert_actions
+        self.prev_action = self.expert_actions[0]
+        self.current_state = tf.concat([self.expert_states[0], self.prev_action], 0)
+        self.index = 0
+        self.final_index = self.expert_states.shape[0] - 1
+        self.is_terminal = False
+        self.action_dim = self.expert_actions.shape[1]
+        self.state_dim = self.expert_states.shape[1] + self.expert_actions.shape[1]
+
+    def step(action):
+        # convert actions [-1, 1] to [-180, 180]
+        action = action * 180
+        if self.is_terminal:
+            return self.current_state, -sys.maxsize, self.is_terminal
+        self.index += 1
+        if self.index >= self.final_index:
+            self.is_terminal = True
+        self.prev_action = action
+        new_state = self.expert_states[self.index]
+        new_state = tf.concat([new_state, self.prev_action], 0)
+        expert_state = tf.concat(
+            [
+                self.expert_state[self.index],
+                self.expert_actions[self.index]
+            ],
+            0
+        )
+        expert_action = self.expert_actions[self.index]
+        self.current_state = new_state
+        rewards = -distance_from_expert(action, expert_action)[0]
+        rewards += -distance_from_expert(new_state, expert_state)[0]
+        return self.current_state, rewards, self.is_terminal
+
+    def reset():
+        self.is_terminal = False
+        self.prev_action = self.expert_actions[0]
+        self.current_state = tf.concat([self.expert_states[0], self.prev_action], 0)
+        self.index = 0
+        return self.current_state
+
+    def sample_action():
+        return tf.random.uniform([1, self.action_dim], minval=-1, maxval=1)
