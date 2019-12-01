@@ -1,7 +1,7 @@
 import os
 import unittest
 
-import tests.unit.policy.networks as test_networks
+import tests.unit.agents.networks.networks as test_networks
 
 
 def create_and_run_test_suite(test_module):

@@ -5,10 +5,9 @@ import gym
 import numpy as np
 import tensorflow as tf
 
-from IDP.networks import AutoRegressiveStochasticActor as AIQN
-from IDP.networks import StochasticActor as IQN
-from IDP.networks import Critic, Value
-from IDP.agent import IDPAgent
+from agents.IDP.agent import IDPAgent
+from agents.GAC.agent import GACAgent
+from utils.preprocessing import get_data, get_actions_from_segrot
 
 
 def create_argument_parser():
@@ -37,7 +36,7 @@ def create_argument_parser():
         help='batch size (default: 64)'
     )
     parser.add_argument(
-        '--epochs', type=int, default=None, metavar='N',
+        '--epochs', type=int, default=1000, metavar='N',
         help='number of training epochs (default: None)'
     )
     parser.add_argument(
@@ -71,7 +70,7 @@ def create_argument_parser():
         help='For multiple different experiments, provide an informative experiment name'
     )
     parser.add_argument('--print', default=False, action='store_true')
-    parser.add_argument('--actor', default='IQN', choices=['IQN', 'AIQN', 'RNN'])
+    parser.add_argument('--actor', default='IQN', choices=['IQN', 'AIQN', 'RNN', 'FFN'])
     parser.add_argument(
         '--normalize_obs', default=False, action='store_true', help='Normalize observations'
     )
@@ -100,14 +99,62 @@ def create_argument_parser():
     return parser
 
 
+def random_preprocessing(inputs, labels):
+    """
+    Preprocess the data further by shuffling inputs and labels randomly
+
+    Args:
+        inputs (tf.Variable): variable containing a 2d vector of inputs
+        labels (tf.Variable): variable containing a 1d vector of labels (predicted words)
+
+    Returns:
+        shuffled inputs and corresponding labels
+    """
+    indices = range(0, labels.shape[0])
+    shuffled_indices = tf.random.shuffle(indices)
+    inputs = tf.gather(inputs, shuffled_indices)
+    labels = tf.gather(labels, shuffled_indices)
+    return inputs, labels
+
+
+def train(model, train_states, train_actions, batch_size):
+    """
+    Function to train the inputted model on the provided training states and actions
+
+    Args:
+        model (IDPAgent): An IDPAgent instance to train on the expert strategy
+        train_states (tf.Variable): states to be used for training
+        train_actions (tf.Variable): expert actions for training
+
+    Returns:
+        None
+    """
+    # randomly shuffile input data to increase accuracy
+    shuffled_states, shuffled_actions = random_preprocessing(train_states, train_actions)
+
+    tl = train_states.shape[0]  # training inputs length
+    mod = tl % batch_size  # number of batches resulting from batch size
+    N = int(np.floor(tl/batch_size))  # number for splitting training data
+    split_details = [batch_size] * N  # N elements of batch_size [batch_size, batch_size, ...]
+    split_details.append(mod)
+    shuffled_states = tf.split(shuffled_states, split_details)
+    shuffled_actions = tf.split(shuffled_actions, split_details)
+
+    for j in range(tl):
+        # Implement backprop:
+        model.train_actor(shuffled_states, shuffled_actions)
+
+
 def main():
     print(tf.__version__)
     print("GPU Available: ", tf.test.is_gpu_available())
 
     args = create_argument_parser().parse_args()
 
-    action_dim = 38
-    state_dim = 100
+    segrot, srates, markpos = get_data(file='data/COS071212_mocap_preprocessed.mat')
+    actions = get_actions_from_segrot(segrot)
+    action_dim = actions.shape[1]
+    state_dim = states.shape[1]
     args.action_dim = action_dim
     args.state_dim = state_dim
 
@@ -118,11 +165,13 @@ def main():
     base_dir = base_dir + str(run_number)
     os.makedirs(base_dir)
 
-    gac = GACAgent(**args.__dict__)
+    idp_agent = IDPAgent(**args.__dict__)
+    for _ in range(args.epochs):
+        train(idp_agent, srates, actions, args.batch_size)
 
     # TODO: train the network
 
-    utils.save_model(gac.actor, base_dir)
+    utils.save_model(idp_agent.actor, base_dir)
 
 
 if __name__ == '__main__':
