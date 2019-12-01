@@ -189,7 +189,7 @@ def main():
 
     eval_env = IDPEnvironment(states, actions)
 
-    base_dir = os.getcwd() + '/model/'
+    base_dir = os.getcwd() + '/models/IDPAgent/'
     run_number = 0
     while os.path.exists(base_dir + str(run_number)):
         run_number += 1
