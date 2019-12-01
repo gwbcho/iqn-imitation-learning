@@ -146,7 +146,7 @@ def train(model, train_states, train_actions, batch_size):
     shuffled_states = tf.split(shuffled_states, split_details)
     shuffled_actions = tf.split(shuffled_actions, split_details)
 
-    for i in trange(tl):
+    for i in trange(len(shuffled_states)):
         # Implement backprop:
         model.train_actor(shuffled_states[i], shuffled_actions[i])
 
@@ -166,7 +166,7 @@ def evaluate_policy(policy, expert_states, expert_actions, episodes):
         shuffled_states = tf.split(shuffled_states, split_details)
         shuffled_actions = tf.split(shuffled_actions, split_details)
 
-        for i in range(tl):
+        for i in range(len(shuffled_states)):
             predicted_actions = policy.get_action(shuffled_states[i])
             distances = -1 * distance_from_expert(predicted_actions, shuffled_actions[i])
             distance_list.extend(list(distances.numpy()))
