@@ -14,7 +14,7 @@ This paper is the work that is most similar to what we aim to do in this project
 
 ## Project Layout
 
-The main components of the Imitation Distributional Policy (IDP) is the IDPAgent model, which is responsible for immitating the actions of the expert agent, and the AIQN which is responsible for constructing a sampling strategy for actions over continuous actions space. These major componentes can be found under the IDP directory. It should be noted (for both users and programmers that the actions returned by the networks are values between [-1, 1]).
+The main components of the Imitation Distributional Policy (IDP) are the IDPAgent model, which is responsible for immitating the actions of the expert agent, and the AIQN which is responsible for constructing a sampling strategy for actions over continuous actions space. These major componentes can be found under the IDP directory. It should be noted (for both users and programmers that the actions returned by the networks are values between [-1, 1]). There are additional directories to house the GAC approach which is to shape rewards to have the agent follow an expert strategy. This method uses the gac_main file for constructing and running the necessary environments.
 
 
 ## Run Commands
