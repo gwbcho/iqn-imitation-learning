@@ -26,7 +26,7 @@ def create_argument_parser():
         '--tau', type=float, default=5e-3, metavar='G',
         help='discount factor for model (default: 0.005)'
     )
-    parser.add_argument('--noise', default='ou', choices=['ou', 'param', 'normal'])
+    parser.add_argument('--noise', default='normal', choices=['ou', 'param', 'normal'])
     parser.add_argument(
         '--noise_scale', type=float, default=0.2, metavar='G',
         help='(default: 0.2)'
@@ -97,6 +97,9 @@ def create_argument_parser():
         '-f', '--expert_file', type=str, default='data/COS071212_mocap_processed.mat',
         help='file to find expert actions for algorithm'
     )
+    parser.add_argument(
+        '-c', '--curtail_length', type=int, default=None, help='max expert data length to consider.'
+    )
     return parser
 
 
@@ -135,6 +138,11 @@ def main():
 
     segrot, states, markpos = get_data(file=args.expert_file)
     actions = get_actions_from_segrot(segrot)
+
+    if args.curtail_length:
+        states = states[0:args.curtail_length]
+        actions = actions[0:args.curtail_length]
+
     action_dim = actions.shape[1]
     state_dim = states.shape[1]
     args.action_dim = action_dim
