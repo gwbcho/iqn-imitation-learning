@@ -8,7 +8,7 @@ from tqdm import trange
 import json
 
 from agents.IDP.agent import IDPAgent
-from environment.environment import IDPEnvironment
+from environment.environment import IDPEnvironment, distance_from_expert
 from utils.preprocessing import get_data, get_actions_from_segrot
 
 
@@ -151,23 +151,27 @@ def train(model, train_states, train_actions, batch_size):
         model.train_actor(shuffled_states[i], shuffled_actions[i])
 
 
-def evaluate_policy(policy, env, episodes):
+def evaluate_policy(policy, expert_states, expert_actions, episodes):
     """
     Run the environment env using policy for episodes number of times.
     Return: average rewards per episode.
     """
-    rewards = []
+    distance_list = []
     for _ in range(episodes):
-        state = np.float32(env.reset())
-        is_terminal = False
-        while not is_terminal:
-            action = policy.get_action(tf.convert_to_tensor([state], dtype=tf.float32))
-            # remove the batch_size dimension if batch_size == 1
-            action = tf.squeeze(action, [0]).numpy()
-            state, reward, is_terminal, _ = env.step(action)
-            state, reward = np.float32(state), np.float32(reward)
-            rewards.append(float(reward))
-    return rewards
+        tl = expert_states.shape[0]  # training inputs length
+        mod = tl % batch_size  # number of batches resulting from batch size
+        N = int(np.floor(tl/batch_size))  # number for splitting training data
+        split_details = [batch_size] * N  # N elements of batch_size [batch_size, batch_size, ...]
+        split_details.append(mod)
+        shuffled_states = tf.split(shuffled_states, split_details)
+        shuffled_actions = tf.split(shuffled_actions, split_details)
+
+        for i in range(tl):
+            predicted_actions = policy.get_action(shuffled_states[i])
+            distances = distance_from_expert(predicted_actions, shuffled_actions[i])
+            distance_list.extend(list(distances.numpy()))
+
+    return distance_list
 
 
 def main():
@@ -196,7 +200,12 @@ def main():
     normalized_expert_actions = actions/180
     for epoch in trange(args.epochs):
         train(idp_agent, states, normalized_expert_actions, args.batch_size)
-        eval_rewards = evaluate_policy(idp_agent, eval_env, args.eval_episodes)
+        eval_rewards = evaluate_policy(
+            idp_agent,
+            states,
+            normalized_expert_actions,
+            args.eval_episodes
+        )
         eval_reward = sum(eval_rewards) / args.eval_episodes
         eval_variance = float(np.var(eval_rewards))
         results_dict['eval_rewards'].append({
