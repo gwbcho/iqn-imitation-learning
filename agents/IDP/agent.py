@@ -135,13 +135,18 @@ class IDPAgent:
         """
         # tile states to be of dimension (batch_size * K, state_dim)
         tiled_states = tf.tile(states, [self.action_samples, 1])
-        tiled_expert_actions = tf.tile(expert_actions, [self.action_samples, 1])
+        expert_actions_normalized = expert_actions
+        tiled_expert_actions = tf.tile(expert_actions_normalized, [self.action_samples, 1])
         # Sample actions with noise for exploration
         target_actions = (
             tiled_expert_actions + tf.random.normal(tiled_expert_actions.shape) * expert_noise
         )
         target_actions = tf.clip_by_value(target_actions, -1, 1)
-        advantages = -environment.distance_from_expert(tiled_expert_actions, target_actions)
+        advantages = tf.expand_dims(
+            # distance from expert actions where expert actions are between -180 and 180
+            -environment.distance_from_expert(tiled_expert_actions, target_actions),
+            1
+        )
         return tiled_states, target_actions, advantages
 
     def get_action(self, states):

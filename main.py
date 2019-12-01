@@ -193,8 +193,9 @@ def main():
     os.makedirs(base_dir)
 
     idp_agent = IDPAgent(states=states, expert_actions=actions, **args.__dict__)
+    normalized_expert_actions = actions/180
     for epoch in trange(args.epochs):
-        train(idp_agent, states, actions, args.batch_size)
+        train(idp_agent, states, normalized_expert_actions, args.batch_size)
         eval_rewards = evaluate_policy(idp_agent, eval_env, args.eval_episodes)
         eval_reward = sum(eval_rewards) / args.eval_episodes
         eval_variance = float(np.var(eval_rewards))
