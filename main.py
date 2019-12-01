@@ -146,7 +146,7 @@ def train(model, train_states, train_actions, batch_size):
     shuffled_states = tf.split(shuffled_states, split_details)
     shuffled_actions = tf.split(shuffled_actions, split_details)
 
-    for i in range(tl):
+    for i in trange(tl):
         # Implement backprop:
         model.train_actor(shuffled_states[i], shuffled_actions[i])
 
@@ -199,6 +199,7 @@ def main():
     idp_agent = IDPAgent(states=states, expert_actions=actions, **args.__dict__)
     normalized_expert_actions = actions/180
     for epoch in trange(args.epochs):
+        print('epoch:', epoch)
         train(idp_agent, states, normalized_expert_actions, args.batch_size)
         eval_rewards = evaluate_policy(
             idp_agent,
