@@ -3,3 +3,5 @@
 **/*.json
 **/.DS_Store
 **/*.mat
+results.txt
+
