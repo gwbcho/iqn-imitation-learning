@@ -91,7 +91,7 @@ class IDPAgent:
             None
         """
         if self.actor == 'RNN' or self.actor == 'FFN':
-            # Train the RNN actor using supervised methods.
+            # Train the RNN or FFN actor using supervised methods.
             with tf.GradientTape() as tape:
                 predicted_actions = self.actor(state_batch)
                 loss = self.actor.loss(expert_action_batch, predicted_actions)

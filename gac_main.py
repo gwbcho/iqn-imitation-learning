@@ -133,7 +133,7 @@ def main():
 
     args = create_argument_parser().parse_args()
 
-    segrot, srates, markpos = get_data(file=args.expert_file)
+    segrot, states, markpos = get_data(file=args.expert_file)
     actions = get_actions_from_segrot(segrot)
     action_dim = actions.shape[1]
     state_dim = states.shape[1]
@@ -143,8 +143,8 @@ def main():
     """
     Create environment
     """
-    env = IDPEnvironment(srates, segrots)
-    eval_env = IDPEnvironment(srates, segrots)
+    env = IDPEnvironment(states, segrots)
+    eval_env = IDPEnvironment(states, segrots)
 
     if args.noise == 'ou':
         noise = OrnsteinUhlenbeckActionNoise(

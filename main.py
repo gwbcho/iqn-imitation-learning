@@ -8,6 +8,7 @@ from tqdm import trange
 import json
 
 from agents.IDP.agent import IDPAgent
+from environment.environment import IDPEnvironment
 from utils.preprocessing import get_data, get_actions_from_segrot
 
 
@@ -181,6 +182,8 @@ def main():
     state_dim = states.shape[1]
     args.action_dim = action_dim
     args.state_dim = state_dim
+
+    eval_env = IDPEnvironment(states, segrots)
 
     base_dir = os.getcwd() + '/model/'
     run_number = 0

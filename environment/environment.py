@@ -74,6 +74,7 @@ class IDPEnvironment(object):
         self.prev_action = self.expert_actions[0]
         self.current_state = tf.concat([self.expert_states[0], self.prev_action], 1)
         self.index = 0
+        return self.current_state
 
     def sample_action():
         return tf.random.uniform([1, self.action_dim], minval=-1, maxval=1)
