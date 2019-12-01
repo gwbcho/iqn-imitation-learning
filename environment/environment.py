@@ -66,7 +66,6 @@ class IDPEnvironment(object):
         self.current_state = new_state
         rewards = -distance_from_expert(action, expert_action)[0]
         rewards += -distance_from_expert(new_state, expert_state)[0]
-        rewares = rewards/2.0
         return self.current_state, rewards, self.is_terminal
 
     def reset():
