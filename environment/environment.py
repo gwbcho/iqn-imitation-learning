@@ -44,7 +44,7 @@ class IDPEnvironment(object):
         self.action_dim = self.expert_actions.shape[1]
         self.state_dim = self.expert_states.shape[1] + self.expert_actions.shape[1]
 
-    def step(action):
+    def step(self, action):
         # convert actions [-1, 1] to [-180, 180]
         action = action * 180
         if self.is_terminal:
@@ -68,12 +68,12 @@ class IDPEnvironment(object):
         rewards += -distance_from_expert(new_state, expert_state)[0]
         return self.current_state, rewards, self.is_terminal
 
-    def reset():
+    def reset(self):
         self.is_terminal = False
         self.prev_action = self.expert_actions[0]
         self.current_state = tf.concat([self.expert_states[0], self.prev_action], 0)
         self.index = 0
         return self.current_state
 
-    def sample_action():
+    def sample_action(self):
         return tf.random.uniform([1, self.action_dim], minval=-1, maxval=1)

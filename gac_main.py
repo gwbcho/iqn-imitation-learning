@@ -7,11 +7,11 @@ import tensorflow as tf
 from tqdm import trange
 
 import utils.utils as utils
+from agents.GAC.agent import GACAgent
 from environment.environment import IDPEnvironment
 from noises.ounoise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
 from noises.param_noise import AdaptiveParamNoiseSpec, ddpg_distance_metric
-from environment.wapper import Wrapper
-from agents.GAC.agent import GACAgent
+from utils.preprocessing import get_data, get_actions_from_segrot
 
 
 def create_argument_parser():
@@ -167,7 +167,7 @@ def main():
     else:
         param_noise = None
 
-    base_dir = os.getcwd() + '/models/' + args.environment + '/'
+    base_dir = os.getcwd() + '/models/GACAgent/'
     run_number = 0
     while os.path.exists(base_dir + str(run_number)):
         run_number += 1
