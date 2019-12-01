@@ -120,7 +120,7 @@ def evaluate_policy(policy, env, episodes):
             action = policy.get_action(tf.convert_to_tensor([state], dtype=tf.float32))
             # remove the batch_size dimension if batch_size == 1
             action = tf.squeeze(action, [0]).numpy()
-            state, reward, is_terminal, _ = env.step(action)
+            state, reward, is_terminal = env.step(action)
             state, reward = np.float32(state), np.float32(reward)
             rewards.append(float(reward))
             # env.render()
@@ -138,7 +138,7 @@ def main():
     action_dim = actions.shape[1]
     state_dim = states.shape[1]
     args.action_dim = action_dim
-    args.state_dim = state_dim
+    args.state_dim = state_dim + action_dim
 
     """
     Create environment
@@ -207,7 +207,7 @@ def main():
                 """
                 # print('t:', t)
                 if total_steps < args.start_timesteps:
-                    action = tf.expand_dims(env.sample_action(), 0)
+                    action = env.sample_action()
                 else:
                     action = gac.select_perturbed_action(
                         tf.convert_to_tensor([state], dtype=tf.float32),
@@ -217,7 +217,7 @@ def main():
                 # remove the batch_size dimension if batch_size == 1
                 action = tf.squeeze(action, [0]).numpy()
                 # modify action from [-1, 1] to [-180, 180]
-                next_state, reward, is_terminal, _ = env.step(action)
+                next_state, reward, is_terminal = env.step(action)
                 next_state, reward = np.float32(next_state), np.float32(reward)
                 gac.store_transition(state, action, reward, next_state, is_terminal)
                 episode_rewards += reward

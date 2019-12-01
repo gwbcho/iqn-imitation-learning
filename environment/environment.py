@@ -57,7 +57,7 @@ class IDPEnvironment(object):
         new_state = tf.concat([new_state, self.prev_action], 0)
         expert_state = tf.concat(
             [
-                self.expert_state[self.index],
+                self.expert_states[self.index],
                 self.expert_actions[self.index]
             ],
             0

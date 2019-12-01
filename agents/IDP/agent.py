@@ -159,4 +159,6 @@ class IDPAgent:
         Returns:
             sampled actions for the given state with dimension (batch_size, action_dim)
         """
+        if self.actor == 'RNN' or self.actor == 'FFN':
+            return self.actor(states)
         return self.action_sampler.get_sampled_actions(self.actor, states)
