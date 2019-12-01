@@ -168,7 +168,7 @@ def evaluate_policy(policy, expert_states, expert_actions, episodes):
 
         for i in range(tl):
             predicted_actions = policy.get_action(shuffled_states[i])
-            distances = distance_from_expert(predicted_actions, shuffled_actions[i])
+            distances = -1 * distance_from_expert(predicted_actions, shuffled_actions[i])
             distance_list.extend(list(distances.numpy()))
 
     return distance_list
