@@ -163,7 +163,6 @@ def evaluate_policy(policy, expert_states, expert_actions, episodes, batch_size)
     Return: average rewards per episode.
     """
     distance_list = []
-    print('eval being called')
     for _ in range(episodes):
         tl = expert_states.shape[0]  # training inputs length
         mod = tl % batch_size  # number of batches resulting from batch size
