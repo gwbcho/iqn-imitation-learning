@@ -152,7 +152,7 @@ def train(model, train_states, train_actions, batch_size):
     shuffled_states = tf.split(shuffled_states, split_details)
     shuffled_actions = tf.split(shuffled_actions, split_details)
 
-    for i in trange(len(shuffled_states)):
+    for i in range(len(shuffled_states)):
         # Implement backprop:
         model.train_actor(shuffled_states[i], shuffled_actions[i])
 
@@ -163,18 +163,19 @@ def evaluate_policy(policy, expert_states, expert_actions, episodes, batch_size)
     Return: average rewards per episode.
     """
     distance_list = []
+    print('eval being called')
     for _ in range(episodes):
         tl = expert_states.shape[0]  # training inputs length
         mod = tl % batch_size  # number of batches resulting from batch size
         N = int(np.floor(tl/batch_size))  # number for splitting training data
         split_details = [batch_size] * N  # N elements of batch_size [batch_size, batch_size, ...]
         split_details.append(mod)
-        shuffled_states = tf.split(shuffled_states, split_details)
-        shuffled_actions = tf.split(shuffled_actions, split_details)
+        batched_states = tf.split(expert_states, split_details)
+        batched_actions = tf.split(expert_actions, split_details)
 
-        for i in range(len(shuffled_states)):
-            predicted_actions = policy.get_action(shuffled_states[i])
-            distances = -1 * distance_from_expert(predicted_actions, shuffled_actions[i])
+        for i in range(len(batched_states)):
+            predicted_actions = policy.get_action(batched_states[i])
+            distances = -1 * distance_from_expert(predicted_actions, batched_actions[i])
             distance_list.extend(list(distances.numpy()))
 
     return distance_list
