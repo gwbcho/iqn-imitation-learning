@@ -157,7 +157,7 @@ def train(model, train_states, train_actions, batch_size):
         model.train_actor(shuffled_states[i], shuffled_actions[i])
 
 
-def evaluate_policy(policy, expert_states, expert_actions, episodes):
+def evaluate_policy(policy, expert_states, expert_actions, episodes, batch_size):
     """
     Run the environment env using policy for episodes number of times.
     Return: average rewards per episode.
@@ -211,7 +211,8 @@ def main():
             idp_agent,
             states,
             actions,
-            args.eval_episodes
+            args.eval_episodes,
+            args.batch_size
         )
         eval_reward = sum(eval_rewards) / args.eval_episodes
         eval_variance = float(np.var(eval_rewards))
