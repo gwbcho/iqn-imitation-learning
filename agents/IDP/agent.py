@@ -97,7 +97,6 @@ class IDPAgent:
             self.actor.optimizer.apply_gradients(zip(gradients, self.actor.trainable_variables))
             return
 
-        # TODO: select a random set of actions
         # determine a set of positive advantage states, actions, and advantages from the "target"
         # network which, for our purposes, is simply the expert action with gaussian noise for
         # normalization purposes
