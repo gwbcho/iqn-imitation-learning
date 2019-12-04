@@ -41,4 +41,23 @@ def get_actions_from_segrot(segrot):
     actions[1:num_segrots - 1, :].assign(
         segrot[1:num_segrots - 1, :] - segrot[0:num_segrots - 2, :]
     )
-    return actions
+    # important actions to reduce need for exploration
+    # 3 5:6 8:9 18 20:21 30:31 33 35:36 45 47:48 57:58 62 66 73 75 78:80
+    reduced_actions = tf.concat([
+        tf.expand_dims(actions[:, 3], 1),
+        actions[:, 5:7],
+        actions[:, 8:10],
+        tf.expand_dims(actions[:, 18], 1),
+        actions[:, 20:22],
+        actions[:, 30:32],
+        tf.expand_dims(actions[:, 33], 1),
+        tf.expand_dims(actions[:, 45], 1),
+        actions[:, 47:49],
+        actions[:, 57:59],
+        tf.expand_dims(actions[:, 62], 1),
+        tf.expand_dims(actions[:, 66], 1),
+        tf.expand_dims(actions[:, 73], 1),
+        tf.expand_dims(actions[:, 75], 1),
+        actions[:, 78:81]
+    ], 1)
+    return reduced_actions
