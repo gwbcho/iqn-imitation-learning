@@ -69,7 +69,7 @@ class IDPAgent:
         elif actor == 'RNN':
             self.actor = AIQNRNN(self.state_dim, self.action_dim)
         elif actor == 'FFN':
-            self.actor = IQNFNN(self.state_dim, self.action_dim)
+            self.actor = IQNFFN(self.state_dim, self.action_dim)
 
         self.action_sampler = ActionSampler(self.actor.action_dim)
 
