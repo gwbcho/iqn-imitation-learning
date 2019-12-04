@@ -191,13 +191,11 @@ def main():
     action_dim = actions.shape[1]
     state_dim = states.shape[1]
     args.action_dim = action_dim
-    args.state_dim = state_dim + action_dim
+    args.state_dim = state_dim
 
     if args.curtail_length:
         states = states[0:args.curtail_length + 1]
         actions = actions[0:args.curtail_length + 1]
-
-    eval_env = IDPEnvironment(states[1:], actions[1:], args.max_steps)
 
     base_dir = os.getcwd() + '/models/IDPAgent/'
     run_number = 0
