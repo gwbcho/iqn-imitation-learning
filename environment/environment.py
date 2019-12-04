@@ -49,8 +49,8 @@ class IDPEnvironment(object):
         self.state_dim = self.expert_states.shape[1] + self.expert_actions.shape[1]
 
     def step(self, action):
-        # convert actions [-1, 1] to [-180, 180]
-        action = action * 180
+        # Convert actions [-1, 1] to the correct action dimension. This is only necessary for large
+        # steps.
         if self.is_terminal:
             return self.current_state, -sys.maxsize, self.is_terminal
         self.index += 1
