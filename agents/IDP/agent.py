@@ -5,7 +5,7 @@ import tensorflow as tf
 # import local dependencies
 import environment.environment as environment
 from agents.networks.networks import StochasticActor, AutoRegressiveStochasticActor, AIQNRNN, IQNFFN
-from agents.helpers import ReplayBuffer, update, ActionSampler
+from agents.helpers import ActionSampler
 
 
 """
@@ -60,6 +60,8 @@ class IDPAgent:
         self.expert_actions_len = expert_actions.shape[0]
         self.state_indicies = range(self.state_len)
         self.expert_action_indicies = range(self.expert_actions_len)
+
+        self.action_sampler = ActionSampler(self.actor.action_dim)
 
         # type of actor being used
         self.actor = actor

@@ -102,6 +102,12 @@ def create_argument_parser():
         '-f', '--expert_file', type=str, default='data/COS071212_mocap_processed.mat',
         help='file to find expert actions for algorithm'
     )
+    parser.add_argument(
+        '-c', '--curtail_length', type=int, default=None, help='max expert data length to consider.'
+    )
+    parser.add_argument(
+        '-m', '--max_steps', type=int, default=1000, help='max environment steps before termination.'
+    )
     return parser
 
 
@@ -146,12 +152,12 @@ def train(model, train_states, train_actions, batch_size):
     shuffled_states = tf.split(shuffled_states, split_details)
     shuffled_actions = tf.split(shuffled_actions, split_details)
 
-    for i in trange(len(shuffled_states)):
+    for i in range(len(shuffled_states)):
         # Implement backprop:
         model.train_actor(shuffled_states[i], shuffled_actions[i])
 
 
-def evaluate_policy(policy, expert_states, expert_actions, episodes):
+def evaluate_policy(policy, expert_states, expert_actions, episodes, batch_size):
     """
     Run the environment env using policy for episodes number of times.
     Return: average rewards per episode.
@@ -163,12 +169,12 @@ def evaluate_policy(policy, expert_states, expert_actions, episodes):
         N = int(np.floor(tl/batch_size))  # number for splitting training data
         split_details = [batch_size] * N  # N elements of batch_size [batch_size, batch_size, ...]
         split_details.append(mod)
-        shuffled_states = tf.split(shuffled_states, split_details)
-        shuffled_actions = tf.split(shuffled_actions, split_details)
+        batched_states = tf.split(expert_states, split_details)
+        batched_actions = tf.split(expert_actions, split_details)
 
-        for i in range(len(shuffled_states)):
-            predicted_actions = policy.get_action(shuffled_states[i])
-            distances = -1 * distance_from_expert(predicted_actions, shuffled_actions[i])
+        for i in range(len(batched_states)):
+            predicted_actions = policy.get_action(batched_states[i])
+            distances = -1 * distance_from_expert(predicted_actions, batched_actions[i])
             distance_list.extend(list(distances.numpy()))
 
     return distance_list
@@ -187,7 +193,9 @@ def main():
     args.action_dim = action_dim
     args.state_dim = state_dim
 
-    eval_env = IDPEnvironment(states, actions)
+    if args.curtail_length:
+        states = states[0:args.curtail_length + 1]
+        actions = actions[0:args.curtail_length + 1]
 
     base_dir = os.getcwd() + '/models/IDPAgent/'
     run_number = 0
@@ -197,15 +205,14 @@ def main():
     os.makedirs(base_dir)
 
     idp_agent = IDPAgent(states=states, expert_actions=actions, **args.__dict__)
-    normalized_expert_actions = actions/180
     for epoch in trange(args.epochs):
-        print('epoch:', epoch)
-        train(idp_agent, states, normalized_expert_actions, args.batch_size)
+        train(idp_agent, states, actions, args.batch_size)
         eval_rewards = evaluate_policy(
             idp_agent,
             states,
-            normalized_expert_actions,
-            args.eval_episodes
+            actions,
+            args.eval_episodes,
+            args.batch_size
         )
         eval_reward = sum(eval_rewards) / args.eval_episodes
         eval_variance = float(np.var(eval_rewards))
