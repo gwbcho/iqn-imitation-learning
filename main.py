@@ -184,6 +184,8 @@ def main():
     print(tf.__version__)
     print("GPU Available: ", tf.test.is_gpu_available())
 
+    results_dict = {'eval_rewards': []}
+
     args = create_argument_parser().parse_args()
 
     segrot, states, markpos = get_data(file=args.expert_file)
