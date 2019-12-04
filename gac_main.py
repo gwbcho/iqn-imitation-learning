@@ -96,6 +96,9 @@ def create_argument_parser():
     parser.add_argument(
         '-c', '--curtail_length', type=int, default=None, help='max expert data length to consider.'
     )
+    parser.add_argument(
+        '-m', '--max_steps', type=int, default=1000, help='max environment steps before termination.'
+    )
     return parser
 
 
@@ -136,8 +139,8 @@ def main():
     actions = get_actions_from_segrot(segrot)
 
     if args.curtail_length:
-        states = states[0:args.curtail_length]
-        actions = actions[0:args.curtail_length]
+        states = states[0:args.curtail_length + 1]
+        actions = actions[0:args.curtail_length + 1]
 
     action_dim = actions.shape[1]
     state_dim = states.shape[1]
@@ -147,8 +150,8 @@ def main():
     """
     Create environment
     """
-    env = IDPEnvironment(states, actions)
-    eval_env = IDPEnvironment(states, actions)
+    env = IDPEnvironment(states[1:], actions[1:], args.max_steps)
+    eval_env = IDPEnvironment(states[1:], actions[1:], args.max_steps)
 
     if args.noise == 'ou':
         noise = OrnsteinUhlenbeckActionNoise(
