@@ -102,6 +102,12 @@ def create_argument_parser():
         '-f', '--expert_file', type=str, default='data/COS071212_mocap_processed.mat',
         help='file to find expert actions for algorithm'
     )
+    parser.add_argument(
+        '-c', '--curtail_length', type=int, default=None, help='max expert data length to consider.'
+    )
+    parser.add_argument(
+        '-m', '--max_steps', type=int, default=1000, help='max environment steps before termination.'
+    )
     return parser
 
 
@@ -185,9 +191,13 @@ def main():
     action_dim = actions.shape[1]
     state_dim = states.shape[1]
     args.action_dim = action_dim
-    args.state_dim = state_dim
+    args.state_dim = state_dim + action_dim
 
-    eval_env = IDPEnvironment(states, actions)
+    if args.curtail_length:
+        states = states[0:args.curtail_length + 1]
+        actions = actions[0:args.curtail_length + 1]
+
+    eval_env = IDPEnvironment(states[1:], actions[1:], args.max_steps)
 
     base_dir = os.getcwd() + '/models/IDPAgent/'
     run_number = 0
@@ -197,14 +207,12 @@ def main():
     os.makedirs(base_dir)
 
     idp_agent = IDPAgent(states=states, expert_actions=actions, **args.__dict__)
-    normalized_expert_actions = actions/180
     for epoch in trange(args.epochs):
-        print('epoch:', epoch)
-        train(idp_agent, states, normalized_expert_actions, args.batch_size)
+        train(idp_agent, states, actions, args.batch_size)
         eval_rewards = evaluate_policy(
             idp_agent,
             states,
-            normalized_expert_actions,
+            actions,
             args.eval_episodes
         )
         eval_reward = sum(eval_rewards) / args.eval_episodes
