@@ -36,10 +36,6 @@ def create_argument_parser():
         help='batch size (default: 64)'
     )
     parser.add_argument(
-        '--epochs', type=int, default=None, metavar='N',
-        help='number of training epochs (default: None)'
-    )
-    parser.add_argument(
         '--epoch_cycles', type=int, default=20, metavar='N',
         help='default=20'
     )
