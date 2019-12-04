@@ -61,10 +61,7 @@ class IDPAgent:
         self.state_indicies = range(self.state_len)
         self.expert_action_indicies = range(self.expert_actions_len)
 
-        self.action_sampler = ActionSampler(self.actor.action_dim)
-
         # type of actor being used
-        self.actor = actor
         if self.actor == 'IQN':
             self.actor = StochasticActor(self.state_dim, self.action_dim)
         elif self.actor == 'AIQN':
@@ -73,6 +70,8 @@ class IDPAgent:
             self.actor = AIQNRNN(self.state_dim, self.action_dim)
         elif self.actor == 'FFN':
             self.actor = IQNFNN(self.state_dim, self.action_dim)
+
+        self.action_sampler = ActionSampler(self.actor.action_dim)
 
     def train_actor(self, state_batch, expert_action_batch):
         """
