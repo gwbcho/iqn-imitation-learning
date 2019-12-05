@@ -33,13 +33,17 @@ def distance_from_expert(agent_actions, expert_actions):
 
 class IDPEnvironment(object):
 
-    def __init__(self, expert_states, expert_actions, max_steps=1000):
+    def __init__(self, expert_states, expert_actions, max_steps=1000, rand_init=True):
         self.expert_states = expert_states
         self.expert_actions = expert_actions
         self.max_steps = max_steps
+        self.rand_init = rand_init
 
         self.final_index = self.expert_states.shape[0] - 1
-        self.index = np.random.randint(0, self.final_index)
+        self.index = 0
+        if self.rand_init:
+            self.index = np.random.randint(0, self.final_index)
+
         self.current_step = 0
         self.prev_action = self.expert_actions[self.index]
         self.current_state = tf.concat([self.expert_states[self.index], self.prev_action], 0)
@@ -74,11 +78,14 @@ class IDPEnvironment(object):
         return self.current_state, rewards, self.is_terminal
 
     def reset(self):
-        rand_int = np.random.randint(0, self.final_index)
+        new_index = 0
+        if self.rand_init:
+            new_index = np.random.randint(0, self.final_index)
+
         self.is_terminal = False
-        self.prev_action = self.expert_actions[rand_int]
-        self.current_state = tf.concat([self.expert_states[rand_int], self.prev_action], 0)
-        self.index = rand_int
+        self.prev_action = self.expert_actions[new_index]
+        self.current_state = tf.concat([self.expert_states[new_index], self.prev_action], 0)
+        self.index = new_index
         self.current_step = 0
         return self.current_state
 

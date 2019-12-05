@@ -74,6 +74,10 @@ def create_argument_parser():
         '--normalize_rewards', default=False, action='store_true', help='Normalize rewards'
     )
     parser.add_argument(
+        '--rand_init', default=True, action='store_true',
+        help='Randomly initialize the starting positions for the expert environment. The default value is True.'
+    )
+    parser.add_argument(
         '--q_normalization', type=float, default=0.01,
         help='Uniformly smooth the Q function in this range.'
     )
@@ -150,8 +154,8 @@ def main():
     """
     Create environment
     """
-    env = IDPEnvironment(states[1:], actions[1:], args.max_steps)
-    eval_env = IDPEnvironment(states[1:], actions[1:], args.max_steps)
+    env = IDPEnvironment(states[1:], actions[1:], args.max_steps, args.rand_init)
+    eval_env = IDPEnvironment(states[1:], actions[1:], args.max_steps, args.rand_init)
 
     if args.noise == 'ou':
         noise = OrnsteinUhlenbeckActionNoise(
