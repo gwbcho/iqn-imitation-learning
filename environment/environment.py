@@ -76,8 +76,8 @@ class IDPEnvironment(object):
     def reset(self):
         rand_int = np.random.randint(0, self.final_index)
         self.is_terminal = False
-        self.prev_action = self.expert_actions[0]
-        self.current_state = tf.concat([self.expert_states[0], self.prev_action], 0)
+        self.prev_action = self.expert_actions[rand_int]
+        self.current_state = tf.concat([self.expert_states[rand_int], self.prev_action], 0)
         self.index = rand_int
         self.current_step = 0
         return self.current_state
