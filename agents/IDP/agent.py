@@ -144,7 +144,7 @@ class IDPAgent:
         )
         target_actions = tf.clip_by_value(target_actions, -1, 1)
         advantages = tf.expand_dims(
-            # distance from expert actions where expert actions are between -180 and 180
+            # distance from expert actions where expert actions are between -1 and 1
             -environment.distance_from_expert(tiled_expert_actions, target_actions),
             1
         )
