@@ -62,13 +62,14 @@ class IDPAgent:
         self.expert_action_indicies = range(self.expert_actions_len)
 
         # type of actor being used
-        if actor == 'IQN':
+        self.actor_name = actor
+        if self.actor_name == 'IQN':
             self.actor = StochasticActor(self.state_dim, self.action_dim)
-        elif actor == 'AIQN':
+        elif self.actor_name == 'AIQN':
             self.actor = AutoRegressiveStochasticActor(self.state_dim, self.action_dim)
-        elif actor == 'RNN':
+        elif self.actor_name == 'RNN':
             self.actor = AIQNRNN(self.state_dim, self.action_dim)
-        elif actor == 'FFN':
+        elif self.actor_name == 'FFN':
             self.actor = IQNFFN(self.state_dim, self.action_dim)
 
         self.action_sampler = ActionSampler(self.actor.action_dim)
@@ -87,7 +88,7 @@ class IDPAgent:
         Returns:
             None
         """
-        if self.actor == 'RNN' or self.actor == 'FFN':
+        if self.actor_name == 'RNN' or self.actor_name == 'FFN':
             # Train the RNN or FFN actor using supervised methods.
             with tf.GradientTape() as tape:
                 predicted_actions = self.actor(state_batch)
@@ -159,6 +160,6 @@ class IDPAgent:
         Returns:
             sampled actions for the given state with dimension (batch_size, action_dim)
         """
-        if self.actor == 'RNN' or self.actor == 'FFN':
+        if self.actor_name == 'RNN' or self.actor_name == 'FFN':
             return self.actor(states)
         return self.action_sampler.get_actions(self.actor, states)
