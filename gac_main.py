@@ -74,7 +74,7 @@ def create_argument_parser():
         '--normalize_rewards', default=False, action='store_true', help='Normalize rewards'
     )
     parser.add_argument(
-        '--rand_init', default=True, action='store_true',
+        '--rand_init', default=False, action='store_true',
         help='Randomly initialize the starting positions for the expert environment. The default value is True.'
     )
     parser.add_argument(
