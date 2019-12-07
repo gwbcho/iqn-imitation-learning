@@ -7,6 +7,7 @@ import tensorflow as tf
 from tqdm import trange
 import json
 
+import utils.utils as utils
 from agents.IDP.agent import IDPAgent
 from environment.environment import IDPEnvironment, distance_from_expert
 from utils.preprocessing import get_data, get_actions_from_segrot
