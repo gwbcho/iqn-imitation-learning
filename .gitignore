@@ -3,5 +3,6 @@
 **/*.json
 **/.DS_Store
 **/*.mat
+models/*
 results.txt
 

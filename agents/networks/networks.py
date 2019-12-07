@@ -155,7 +155,6 @@ class AutoRegressiveStochasticActor(IQNActor):
         """
         super(AutoRegressiveStochasticActor, self).__init__(state_dim, action_dim)
         # create all necessary class variables
-        self.module_type = 'AutoRegressiveStochasticActor'
         self.state_embedding = Dense(
             400,  # as specified by the architecture in the paper and in their code
             activation=LeakyReLU(alpha=0.01)
@@ -409,7 +408,6 @@ class StochasticActor(IQNActor):
             n_basis_functions (int): the number of basis functions for noise embedding.
         """
         super(StochasticActor, self).__init__(state_dim, action_dim)
-        self.module_type = 'StochasticActor'
         self.noise_embed_dim = 400 // action_dim
 
         self.state_embedding_layer = Dense(
@@ -463,10 +461,9 @@ class IQNFFN(tf.Module):
             action_dim (int): the dimensionality of the action vector
             n_basis_functions (int): the number of basis functions for noise embedding.
         """
-        super(StochasticActor, self).__init__()
+        super(IQNFFN, self).__init__()
         self.state_dim = state_dim
         self.action_dim = action_dim
-        self.module_type = 'StochasticActor'
         self.noise_embed_dim = 400 // action_dim
 
         self.state_embedding_layer = Dense(
