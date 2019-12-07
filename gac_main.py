@@ -75,7 +75,7 @@ def create_argument_parser():
     )
     parser.add_argument(
         '--rand_init', default=False, action='store_true',
-        help='Randomly initialize the starting positions for the expert environment. The default value is True.'
+        help='Randomly initialize the starting positions for the expert environment. The default value is False.'
     )
     parser.add_argument(
         '--q_normalization', type=float, default=0.01,
