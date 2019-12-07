@@ -57,24 +57,32 @@ class IDPEnvironment(object):
         # steps.
         if self.is_terminal:
             return self.current_state, -sys.maxsize, self.is_terminal
+        # save previous index
+        prev_index = self.index
         self.index += 1
         self.current_step += 1
+        # terminate if the sequence is too long or if the expert agent terminates
         if self.index >= self.final_index or self.current_step >= self.max_steps:
             self.is_terminal = True
-        self.prev_action = action
-        new_state = self.expert_states[self.index]
-        new_state = tf.concat([new_state, self.prev_action], 0)
-        expert_state = tf.concat(
+        # determine the previous state and new state given environment information
+        prev_state = tf.concat([self.expert_states[prev_index], self.prev_action], 0)
+        new_state = tf.concat([self.expert_states[self.index], action], 0)
+        # create the previous state vector
+        prev_expert_state = tf.concat(
             [
-                self.expert_states[self.index],
-                self.expert_actions[self.index]
+                self.expert_states[prev_index],
+                self.expert_actions[prev_index]
             ],
             0
         )
+        # determine the expert action for reward calculations
         expert_action = self.expert_actions[self.index]
-        self.current_state = new_state
+        # calculate reward using previous actions and states as well as current actions
         rewards = -distance_from_expert(action, expert_action)[0]
-        rewards += -distance_from_expert(new_state, expert_state)[0]
+        rewards += -distance_from_expert(prev_state, prev_expert_state)[0]
+        # save new state and action pair
+        self.current_state = new_state
+        self.prev_action = action
         return self.current_state, rewards, self.is_terminal
 
     def reset(self):
