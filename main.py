@@ -15,7 +15,7 @@ from utils.preprocessing import get_data, get_actions_from_segrot
 
 def create_argument_parser():
     parser = argparse.ArgumentParser(
-        description='An implementation of the Distributional Policy Optimization paper.',
+        description='An imitation model using IDP.',
     )
     parser.add_argument(
         '--gamma', type=float, default=0.99, metavar='G',
