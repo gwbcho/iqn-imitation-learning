@@ -18,10 +18,6 @@ def create_argument_parser():
         description='An implementation of the Distributional Policy Optimization paper.',
     )
     parser.add_argument(
-        '--environment', default="HalfCheetah-v2",
-        help='name of the environment to run. default="HalfCheetah-v2"'
-    )
-    parser.add_argument(
         '--gamma', type=float, default=0.99, metavar='G',
         help='discount factor for reward (default: 0.99)'
     )
