@@ -54,7 +54,8 @@ class IDPEnvironment(object):
 
     def step(self, action):
         # Convert actions [-1, 1] to the correct action dimension. This is only necessary for large
-        # steps.
+        # steps. The larger the correction, the more difficult exploration becomes.
+        action = action * 5
         if self.is_terminal:
             return self.current_state, -sys.maxsize, self.is_terminal
         # save previous index
