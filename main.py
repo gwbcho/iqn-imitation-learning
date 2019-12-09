@@ -196,6 +196,14 @@ def main():
         states = states[0:args.curtail_length + 1]
         actions = actions[0:args.curtail_length + 1]
 
+    num_states = states.shape[0]
+    num_train = int(0.9 * num_states)
+    num_test = 1 - num_train
+    train_states = states[:num_train]
+    train_actions = actions[:num_train]
+    test_states = states[num_test:]
+    test_actions = actions[num_test:]
+
     base_dir = os.getcwd() + '/models/IDPAgent/'
     run_number = 0
     while os.path.exists(base_dir + str(run_number)):
@@ -203,13 +211,13 @@ def main():
     base_dir = base_dir + str(run_number)
     os.makedirs(base_dir)
 
-    idp_agent = IDPAgent(states=states, expert_actions=actions, **args.__dict__)
+    idp_agent = IDPAgent(**args.__dict__)
     for epoch in trange(args.epochs):
-        train(idp_agent, states, actions, args.batch_size)
+        train(idp_agent, train_states, train_actions, args.batch_size)
         eval_rewards = evaluate_policy(
             idp_agent,
-            states,
-            actions,
+            test_states,
+            test_actions,
             args.eval_episodes,
             args.batch_size
         )
