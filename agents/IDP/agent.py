@@ -21,7 +21,7 @@ class IDPAgent:
     Action is always from -1 to 1 in each dimension.
     Will not do normalization.
     """
-    def __init__(self, action_dim, state_dim, states, expert_actions, action_samples=10,
+    def __init__(self, action_dim, state_dim, action_samples=10,
                  mode='linear', beta=1, batch_size=64, actor='AIQN', expert_noise=0.01,
                  *args, **kwargs):
         """
@@ -50,16 +50,6 @@ class IDPAgent:
         self.beta = beta
         self.batch_size = batch_size
         self.expert_noise = expert_noise
-
-        # expert states and actions
-        self.states = states
-        self.expert_actions = expert_actions
-
-        # determine how many states and actions there are
-        self.state_len = states.shape[0]
-        self.expert_actions_len = expert_actions.shape[0]
-        self.state_indicies = range(self.state_len)
-        self.expert_action_indicies = range(self.expert_actions_len)
 
         # type of actor being used
         self.actor_name = actor
