@@ -196,7 +196,7 @@ def main():
         states = states[0:args.curtail_length + 1]
         actions = actions[0:args.curtail_length + 1]
 
-    num_states = len(states)
+    num_states = state.shape[0]
     num_train = int(0.9 * num_states)
     num_test = 1 - num_train
     train_states = states[:num_train]
