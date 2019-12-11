@@ -103,6 +103,15 @@ def create_argument_parser():
     parser.add_argument(
         '-m', '--max_steps', type=int, default=1000, help='max environment steps before termination.'
     )
+    parser.add_argument(
+        '-v', '--verbose', default=False, action='store_true', help='Store more verbose reward information.'
+    )
+    parser.add_argument(
+        '-t', '--create-testset', default=False, action='store_true', help='Create a test set from the data provided.'
+    )
+    parser.add_argument(
+        '-rs', '--results-file', default='results.txt', help='Results file name/location.'
+    )
     return parser
 
 
@@ -156,6 +165,17 @@ def main():
     """
     env = IDPEnvironment(states[1:], actions[1:], args.max_steps, args.rand_init)
     eval_env = IDPEnvironment(states[1:], actions[1:], args.max_steps, args.rand_init)
+
+    if args.create_testset:
+        num_states = states.shape[0]
+        num_train = int(0.9 * num_states)
+        num_test = 1 - num_train
+        train_states = states[1:num_train]
+        train_actions = actions[1:num_train]
+        test_states = states[num_test:]
+        test_actions = actions[num_test:]
+        env = IDPEnvironment(train_states, train_actions, args.max_steps, args.rand_init)
+        eval_env = IDPEnvironment(test_states, test_actions, args.max_steps, args.rand_init)
 
     if args.noise == 'ou':
         noise = OrnsteinUhlenbeckActionNoise(
@@ -253,14 +273,22 @@ def main():
                     eval_rewards = evaluate_policy(gac, eval_env, args.eval_episodes)
                     eval_reward = sum(eval_rewards) / args.eval_episodes
                     eval_variance = float(np.var(eval_rewards))
-                    results_dict['eval_rewards'].append({
-                        'total_steps': total_steps,
-                        'train_steps': train_steps,
-                        'average_eval_reward': eval_reward,
-                        'eval_reward_variance': eval_variance,
-                        'eval_rewards_list': eval_rewards
-                    })
-                    with open('results.txt', 'w') as file:
+                    if args.verbose:
+                        results_dict['eval_rewards'].append({
+                            'total_steps': total_steps,
+                            'train_steps': train_steps,
+                            'average_eval_reward': eval_reward,
+                            'eval_reward_variance': eval_variance,
+                            'eval_rewards_list': eval_rewards
+                        })
+                    else:
+                        results_dict['eval_rewards'].append({
+                            'total_steps': total_steps,
+                            'train_steps': train_steps,
+                            'average_eval_reward': eval_reward,
+                            'eval_reward_variance': eval_variance
+                        })
+                    with open(args.results_file, 'w') as file:
                         file.write(json.dumps(results_dict['eval_rewards']))
 
                 total_steps += 1
