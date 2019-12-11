@@ -44,7 +44,7 @@ def create_argument_parser():
         help='default=100'
     )
     parser.add_argument(
-        '--T', type=int, default=50, metavar='N',
+        '--training_steps', type=int, default=50, metavar='N',
         help='number of training steps (default: 50)'
     )
     parser.add_argument(
@@ -107,10 +107,10 @@ def create_argument_parser():
         '-v', '--verbose', default=False, action='store_true', help='Store more verbose reward information.'
     )
     parser.add_argument(
-        '-t', '--create-testset', default=False, action='store_true', help='Create a test set from the data provided.'
+        '-ct', '--create_testset', default=False, action='store_true', help='Create a test set from the data provided.'
     )
     parser.add_argument(
-        '-rf', '--results-file', default='results.txt', help='Results file name/location.'
+        '-rf', '--results_file', default='results.txt', help='Results file name/location.'
     )
     return parser
 
@@ -294,7 +294,7 @@ def main():
                 total_steps += 1
             # train
             if gac.replay.size >= args.batch_size:
-                for _ in range(args.T):
+                for _ in range(args.training_steps):
                     if train_steps % args.param_noise_interval == 0 and param_noise is not None:
                         episode_transitions = gac.replay.sample_batch(args.batch_size)
                         states = episode_transitions.s
