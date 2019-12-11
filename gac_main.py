@@ -257,7 +257,8 @@ def main():
                         'total_steps': total_steps,
                         'train_steps': train_steps,
                         'average_eval_reward': eval_reward,
-                        'eval_reward_variance': eval_variance
+                        'eval_reward_variance': eval_variance,
+                        'eval_rewards_list': eval_rewards
                     })
                     with open('results.txt', 'w') as file:
                         file.write(json.dumps(results_dict['eval_rewards']))
