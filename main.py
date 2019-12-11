@@ -105,6 +105,9 @@ def create_argument_parser():
     parser.add_argument(
         '-m', '--max_steps', type=int, default=1000, help='max environment steps before termination.'
     )
+    parser.add_argument(
+        '-rf', '--results_file', default='results.txt', help='Results file name/location.'
+    )
     return parser
 
 
@@ -229,7 +232,7 @@ def main():
             'average_eval_reward': eval_reward,
             'eval_reward_variance': eval_variance
         })
-        with open('results.txt', 'w') as file:
+        with open(args.results_file, 'w') as file:
             file.write(json.dumps(results_dict['eval_rewards']))
 
     utils.save_model(idp_agent.actor, base_dir)
