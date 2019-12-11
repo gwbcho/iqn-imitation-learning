@@ -294,7 +294,7 @@ def main():
                 total_steps += 1
             # train
             if gac.replay.size >= args.batch_size:
-                for _ in range(args.T):
+                for _ in range(args.training_steps):
                     if train_steps % args.param_noise_interval == 0 and param_noise is not None:
                         episode_transitions = gac.replay.sample_batch(args.batch_size)
                         states = episode_transitions.s
