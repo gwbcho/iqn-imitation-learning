@@ -110,7 +110,7 @@ def create_argument_parser():
         '-t', '--create-testset', default=False, action='store_true', help='Create a test set from the data provided.'
     )
     parser.add_argument(
-        '-rs', '--results-file', default='results.txt', help='Results file name/location.'
+        '-rf', '--results-file', default='results.txt', help='Results file name/location.'
     )
     return parser
 
