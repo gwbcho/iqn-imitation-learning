@@ -109,6 +109,9 @@ def create_argument_parser():
     parser.add_argument(
         '-t', '--create-testset', default=False, action='store_true', help='Create a test set from the data provided.'
     )
+    parser.add_argument(
+        '-rs', '--results-file', default='results.txt', help='Results file name/location.'
+    )
     return parser
 
 
@@ -285,7 +288,7 @@ def main():
                             'average_eval_reward': eval_reward,
                             'eval_reward_variance': eval_variance
                         })
-                    with open('results.txt', 'w') as file:
+                    with open(args.results_file, 'w') as file:
                         file.write(json.dumps(results_dict['eval_rewards']))
 
                 total_steps += 1
