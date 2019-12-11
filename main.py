@@ -198,11 +198,11 @@ def main():
 
     num_states = states.shape[0]
     num_train = int(0.9 * num_states)
-    num_test = 1 - num_train
+    num_test = num_states - num_train
     train_states = states[1:num_train]
     train_actions = actions[1:num_train]
-    test_states = states[num_test:]
-    test_actions = actions[num_test:]
+    test_states = states[-num_test:]
+    test_actions = actions[-num_test:]
 
     base_dir = os.getcwd() + '/models/IDPAgent/'
     run_number = 0
