@@ -103,6 +103,9 @@ def create_argument_parser():
     parser.add_argument(
         '-m', '--max_steps', type=int, default=1000, help='max environment steps before termination.'
     )
+    parser.add_argument(
+        '-v', '--verbose', default=False, action='store_true', help='Store more verbose reward information.'
+    )
     return parser
 
 
@@ -253,13 +256,21 @@ def main():
                     eval_rewards = evaluate_policy(gac, eval_env, args.eval_episodes)
                     eval_reward = sum(eval_rewards) / args.eval_episodes
                     eval_variance = float(np.var(eval_rewards))
-                    results_dict['eval_rewards'].append({
-                        'total_steps': total_steps,
-                        'train_steps': train_steps,
-                        'average_eval_reward': eval_reward,
-                        'eval_reward_variance': eval_variance,
-                        'eval_rewards_list': eval_rewards
-                    })
+                    if args.verbose:
+                        results_dict['eval_rewards'].append({
+                            'total_steps': total_steps,
+                            'train_steps': train_steps,
+                            'average_eval_reward': eval_reward,
+                            'eval_reward_variance': eval_variance,
+                            'eval_rewards_list': eval_rewards
+                        })
+                    else:
+                        results_dict['eval_rewards'].append({
+                            'total_steps': total_steps,
+                            'train_steps': train_steps,
+                            'average_eval_reward': eval_reward,
+                            'eval_reward_variance': eval_variance
+                        })
                     with open('results.txt', 'w') as file:
                         file.write(json.dumps(results_dict['eval_rewards']))
 
