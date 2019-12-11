@@ -82,7 +82,7 @@ class IDPAgent:
             # Train the RNN or FFN actor using supervised methods.
             with tf.GradientTape() as tape:
                 predicted_actions = self.actor(state_batch)
-                loss = self.actor.loss(expert_action_batch, predicted_actions)
+                loss = self.actor.loss(expert_action_batch, 5 * predicted_actions)
 
             gradients = tape.gradient(loss, self.actor.trainable_variables)
             self.actor.optimizer.apply_gradients(zip(gradients, self.actor.trainable_variables))

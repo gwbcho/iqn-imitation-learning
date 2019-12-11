@@ -171,7 +171,7 @@ def evaluate_policy(policy, expert_states, expert_actions, episodes, batch_size)
 
         for i in range(len(batched_states)):
             predicted_actions = policy.get_action(batched_states[i])
-            distances = -1 * distance_from_expert(predicted_actions, batched_actions[i])
+            distances = -1 * distance_from_expert(5*predicted_actions, batched_actions[i])
             distance_list.extend(list(distances.numpy()))
 
     return distance_list
